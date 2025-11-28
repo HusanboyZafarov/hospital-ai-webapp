@@ -30,7 +30,9 @@ export const AppLayout: React.FC = () => {
   ].includes(activeScreen);
 
   const handleTabChange = (tab: string) => {
-    navigate(`/${tab}`);
+    // Map "ai" tab to "ai-assistant" route
+    const route = tab === "ai" ? "/ai-assistant" : `/${tab}`;
+    navigate(route);
   };
 
   return (

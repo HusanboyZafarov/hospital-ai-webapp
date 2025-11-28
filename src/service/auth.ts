@@ -10,7 +10,9 @@ const login = async (
       username,
       password,
     });
-    return response;
+    // axiosInstance returns data directly based on CustomAxiosInstance type
+    // but check if it's wrapped in response.data
+    return (response as any)?.data || response;
   } catch (err) {
     console.error("Login error:", err);
     throw err;
