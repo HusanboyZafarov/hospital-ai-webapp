@@ -1,3 +1,4 @@
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { HomeScreen } from "./HomeScreen";
 import { MedicationsScreen } from "./MedicationsScreen";
@@ -12,13 +13,23 @@ import { useAuth } from "../contexts/AuthContext";
 
 export const HomeScreenWrapper = () => {
   const navigate = useNavigate();
-  return <HomeScreen onNavigate={(screen) => navigate(`/${screen}`)} />;
+  return (
+    <HomeScreen
+      onNavigate={(screen) => {
+        // Map 'ai' to 'ai-assistant' route
+        const route = screen === "ai" ? "ai-assistant" : screen;
+        navigate(`/${route}`);
+      }}
+    />
+  );
 };
 
 export const MedicationsScreenWrapper = () => {
   const navigate = useNavigate();
   return (
-    <MedicationsScreen onViewSchedule={() => navigate("/medication-schedule")} />
+    <MedicationsScreen
+      onViewSchedule={() => navigate("/medication-schedule")}
+    />
   );
 };
 
@@ -45,7 +56,7 @@ export const CarePlanScreenWrapper = () => {
 export const ProfileScreenWrapper = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
-  
+
   const handleLogout = () => {
     logout();
     navigate("/signin");
@@ -66,4 +77,3 @@ export const AppointmentsScreenWrapper = () => {
 export const AIAssistantScreenWrapper = () => {
   return <AIAssistantScreen />;
 };
-

@@ -1,5 +1,5 @@
-import { CheckCircle, XCircle, MessageSquare, Footprints, Dumbbell, Bike, Waves, Mountain, Zap } from 'lucide-react';
-import { useState } from 'react';
+import React, { useState } from "react";
+import { CheckCircle, XCircle, MessageSquare, Footprints, Dumbbell, Bike, Waves, Mountain, Zap } from "lucide-react";
 
 interface ActivitiesScreenProps {
   onAskAI: () => void;

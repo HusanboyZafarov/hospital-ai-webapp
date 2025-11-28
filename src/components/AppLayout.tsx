@@ -7,8 +7,11 @@ export const AppLayout: React.FC = () => {
   const location = useLocation();
 
   const activeScreen = location.pathname.split("/")[1] || "home";
-  const activeTab = ["medications", "diet", "activities", "ai"].includes(activeScreen)
+  // Handle "ai-assistant" route for tab highlighting
+  const activeTab = ["medications", "diet", "activities"].includes(activeScreen)
     ? activeScreen
+    : activeScreen === "ai-assistant"
+    ? "ai"
     : "home";
 
   const hideBottomNav = [
@@ -23,7 +26,7 @@ export const AppLayout: React.FC = () => {
     "medications",
     "diet",
     "activities",
-    "ai",
+    "ai-assistant",
   ].includes(activeScreen);
 
   const handleTabChange = (tab: string) => {
@@ -77,4 +80,3 @@ export const AppLayout: React.FC = () => {
     </div>
   );
 };
-
