@@ -1,12 +1,12 @@
 import { axiosInstance } from "../jwt";
-import type { AuthResponse } from "../types/user";
+import type { ApiAuthResponse } from "../types/user";
 
 const login = async (
   username: string,
   password: string
-): Promise<AuthResponse> => {
+): Promise<ApiAuthResponse> => {
   try {
-    const response = await axiosInstance.post<AuthResponse>("/auth/login", {
+    const response = await axiosInstance.post<ApiAuthResponse>("/auth/login", {
       username,
       password,
     });

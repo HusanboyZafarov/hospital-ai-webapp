@@ -1,8 +1,67 @@
 {
-  "hash": "55f6fb02",
+  "hash": "2ec230b5",
   "configHash": "53721cfe",
-  "lockfileHash": "ef4383db",
-  "browserHash": "907b1d83",
-  "optimized": {},
-  "chunks": {}
+  "lockfileHash": "df164c16",
+  "browserHash": "190033b6",
+  "optimized": {
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "071d6fe7",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "9b20436d",
+      "needsInterop": true
+    },
+    "react-router-dom": {
+      "src": "../../node_modules/react-router-dom/dist/index.mjs",
+      "file": "react-router-dom.js",
+      "fileHash": "3867d318",
+      "needsInterop": false
+    },
+    "axios": {
+      "src": "../../node_modules/axios/index.js",
+      "file": "axios.js",
+      "fileHash": "7bc5b6c9",
+      "needsInterop": false
+    },
+    "jwt-decode": {
+      "src": "../../node_modules/jwt-decode/build/esm/index.js",
+      "file": "jwt-decode.js",
+      "fileHash": "3b5dac0e",
+      "needsInterop": false
+    },
+    "qs": {
+      "src": "../../node_modules/qs/lib/index.js",
+      "file": "qs.js",
+      "fileHash": "f4ca8ceb",
+      "needsInterop": true
+    },
+    "file-saver": {
+      "src": "../../node_modules/file-saver/dist/FileSaver.min.js",
+      "file": "file-saver.js",
+      "fileHash": "ffee2e2e",
+      "needsInterop": true
+    },
+    "lucide-react": {
+      "src": "../../node_modules/lucide-react/dist/esm/lucide-react.js",
+      "file": "lucide-react.js",
+      "fileHash": "1eace03b",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-V2X5ZORR": {
+      "file": "chunk-V2X5ZORR.js"
+    },
+    "chunk-32E4H3EV": {
+      "file": "chunk-32E4H3EV.js"
+    },
+    "chunk-G3PMV62Z": {
+      "file": "chunk-G3PMV62Z.js"
+    }
+  }
 }

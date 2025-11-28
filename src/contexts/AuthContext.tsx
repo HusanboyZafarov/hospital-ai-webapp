@@ -5,7 +5,7 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
-import type { User, AuthResponse } from "../types/user";
+import type { User, AuthResponse, ApiAuthResponse } from "../types/user";
 import { setSession, isValidToken, ACCESS_TOKEN } from "../jwt";
 import authService from "../service/auth";
 
@@ -59,39 +59,68 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
   const login = async (username: string, password: string) => {
     setIsLoading(true);
     try {
-      // Call auth service (currently mock, replace with API call)
-      const response = await authService.login(username, password);
-
-      // For now, create mock user until backend is ready
-      // TODO: Replace with actual API response
-      const mockUser: User = {
-        id: `user_${Date.now()}`,
+      // Call auth service to get REAL user data from API
+      const apiResponse: ApiAuthResponse = await authService.login(
         username,
-        email: `${username}@hospital.com`,
-        name: username.charAt(0).toUpperCase() + username.slice(1),
-        role: username === "admin" ? "admin" : "doctor",
-        department: "General Medicine",
-        permissions: username === "admin" ? ["all"] : ["read", "write"],
+        password
+      );
+
+      // Validate API response structure
+      if (
+        !apiResponse ||
+        !apiResponse.user ||
+        !apiResponse.access ||
+        !apiResponse.refresh
+      ) {
+        throw new Error(
+          "Invalid API response: missing user, access, or refresh token"
+        );
+      }
+
+      // Map API response to our User type
+      const userData: User = {
+        id: apiResponse.user.id.toString(),
+        username: apiResponse.user.username,
+        email: apiResponse.user.email || undefined,
+        name: apiResponse.user.username, // Use username as name fallback
+        role: apiResponse.user.role as User["role"],
       };
 
-      const mockToken = `mock_token_${Date.now()}`;
+      const accessToken = apiResponse.access;
+      const refreshToken = apiResponse.refresh;
 
-      const authData: AuthResponse = {
-        user: mockUser,
-        token: mockToken,
-      };
+      console.log("✅ Using REAL API response:", {
+        user: userData,
+        hasAccessToken: !!accessToken,
+        hasRefreshToken: !!refreshToken,
+      });
 
       // Store tokens using jwt service
       setSession({
-        accessToken: mockToken,
-        refreshToken: `refresh_${Date.now()}`,
+        accessToken,
+        refreshToken,
       });
+
+      // Create auth data for localStorage
+      const authData: AuthResponse = {
+        user: userData,
+        token: accessToken, // Store access token as 'token' for compatibility
+      };
 
       // Store auth data in localStorage
       localStorage.setItem(STORAGE_KEY, JSON.stringify(authData));
-      setUser(mockUser);
+      setUser(userData);
+
+      console.log("✅ User stored successfully:", {
+        userId: userData.id,
+        username: userData.username,
+        name: userData.name,
+        role: userData.role,
+        stored: !!localStorage.getItem(STORAGE_KEY),
+        tokenStored: !!localStorage.getItem(ACCESS_TOKEN),
+      });
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("❌ Login error:", error);
       throw error;
     } finally {
       setIsLoading(false);
