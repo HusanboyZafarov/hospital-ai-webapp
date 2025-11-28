@@ -1,30 +1,39 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Mic } from "lucide-react";
+import { Send } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import aiChatService from "../service/aiChat";
+
+interface Message {
+  id: number;
+  type: "user" | "ai";
+  text: string;
+  time: string;
+}
 
 export function AIAssistantScreen() {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      type: "ai",
-      text: "Hi Mohammad! I'm your AI recovery assistant. I can help you with questions about your medications, diet, activities, and symptoms. How can I help you today?",
-      time: "10:30 AM",
-    },
-    {
-      id: 2,
-      type: "user",
-      text: "Can I eat spicy food?",
-      time: "10:31 AM",
-    },
-    {
-      id: 3,
-      type: "ai",
-      text: "Based on your post-surgical recovery plan, I recommend avoiding spicy foods for now. Spicy foods can cause inflammation and may interfere with healing. Stick to the bland, nutritious foods in your diet plan. You can gradually reintroduce spicy foods after discussing with your doctor.",
-      time: "10:31 AM",
-    },
-  ]);
+  const { user } = useAuth();
+  const userName = user?.name || user?.username || "there";
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [error, setError] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Initialize with welcome message
+  useEffect(() => {
+    if (messages.length === 0) {
+      const welcomeMessage: Message = {
+        id: 1,
+        type: "ai",
+        text: `Hi ${userName}! I'm your AI recovery assistant. I can help you with questions about your medications, diet, activities, and symptoms. How can I help you today?`,
+        time: new Date().toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+        }),
+      };
+      setMessages([welcomeMessage]);
+    }
+  }, [userName, messages.length]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -34,35 +43,63 @@ export function AIAssistantScreen() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSend = () => {
-    if (inputValue.trim()) {
-      const newMessage = {
-        id: messages.length + 1,
-        type: "user" as const,
-        text: inputValue,
+  const handleSend = async () => {
+    if (!inputValue.trim() || isTyping) return;
+
+    const question = inputValue.trim();
+    const userMessage: Message = {
+      id: Date.now(),
+      type: "user",
+      text: question,
+      time: new Date().toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+      }),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setInputValue("");
+    setIsTyping(true);
+    setError("");
+
+    try {
+      // Call real AI chat API
+      const response = await aiChatService.postChat(question);
+
+      const aiResponse: Message = {
+        id: Date.now() + 1,
+        type: "ai",
+        text:
+          response?.data?.answer ||
+          response?.data?.response ||
+          "I understand your question. Based on your current recovery plan and health status, let me provide you with personalized guidance. Always remember to consult your doctor for specific medical advice.",
         time: new Date().toLocaleTimeString("en-US", {
           hour: "numeric",
           minute: "2-digit",
         }),
       };
-      setMessages([...messages, newMessage]);
-      setInputValue("");
-      setIsTyping(true);
 
-      // Simulate AI response
-      setTimeout(() => {
-        const aiResponse = {
-          id: messages.length + 2,
-          type: "ai" as const,
-          text: "I understand your question. Based on your current recovery plan and health status, let me provide you with personalized guidance. Always remember to consult your doctor for specific medical advice.",
-          time: new Date().toLocaleTimeString("en-US", {
-            hour: "numeric",
-            minute: "2-digit",
-          }),
-        };
-        setMessages((prev) => [...prev, aiResponse]);
-        setIsTyping(false);
-      }, 1500);
+      setMessages((prev) => [...prev, aiResponse]);
+    } catch (err: any) {
+      console.error("AI Chat error:", err);
+      const errorMessage =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Sorry, I'm having trouble connecting. Please try again.";
+      setError(errorMessage);
+
+      const errorResponse: Message = {
+        id: Date.now() + 1,
+        type: "ai",
+        text: `Sorry, I encountered an error: ${errorMessage}. Please try again or contact your healthcare provider for immediate assistance.`,
+        time: new Date().toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+        }),
+      };
+      setMessages((prev) => [...prev, errorResponse]);
+    } finally {
+      setIsTyping(false);
     }
   };
 
@@ -206,7 +243,7 @@ export function AIAssistantScreen() {
           </div>
         )}
 
-        {messages.length === 3 && (
+        {messages.length === 1 && (
           <div style={{ marginTop: "8px" }}>
             <p
               className="caption"
@@ -220,21 +257,41 @@ export function AIAssistantScreen() {
               {suggestions.map((suggestion, index) => (
                 <button
                   key={index}
-                  onClick={() => setInputValue(suggestion)}
+                  onClick={() => {
+                    setInputValue(suggestion);
+                    setTimeout(() => handleSend(), 100);
+                  }}
+                  disabled={isTyping}
                   style={{
                     backgroundColor: "var(--bg-white)",
                     border: "1px solid var(--border-grey)",
                     borderRadius: "12px",
                     padding: "12px",
                     textAlign: "left",
-                    cursor: "pointer",
+                    cursor: isTyping ? "not-allowed" : "pointer",
                     color: "var(--primary-blue)",
+                    opacity: isTyping ? 0.6 : 1,
                   }}
                 >
                   {suggestion}
                 </button>
               ))}
             </div>
+          </div>
+        )}
+
+        {error && (
+          <div
+            style={{
+              backgroundColor: "#FEE2E2",
+              color: "#DC2626",
+              padding: "12px",
+              borderRadius: "12px",
+              marginTop: "8px",
+              fontSize: "14px",
+            }}
+          >
+            {error}
           </div>
         )}
 
@@ -262,31 +319,37 @@ export function AIAssistantScreen() {
             onKeyPress={handleKeyPress}
             placeholder="Ask me anything..."
             rows={1}
+            disabled={isTyping}
             style={{
               flex: 1,
               padding: "12px 16px",
               borderRadius: "12px",
               border: "1px solid var(--border-grey)",
-              backgroundColor: "var(--bg-light)",
+              backgroundColor: isTyping
+                ? "var(--card-grey)"
+                : "var(--bg-light)",
               fontSize: "15px",
               outline: "none",
               resize: "none",
               fontFamily: "Inter, sans-serif",
               maxHeight: "100px",
+              cursor: isTyping ? "not-allowed" : "text",
             }}
           />
           <button
             onClick={handleSend}
-            disabled={!inputValue.trim()}
+            disabled={!inputValue.trim() || isTyping}
             style={{
               width: "48px",
               height: "48px",
               borderRadius: "12px",
-              backgroundColor: inputValue.trim()
-                ? "var(--primary-blue)"
-                : "var(--card-grey)",
+              backgroundColor:
+                inputValue.trim() && !isTyping
+                  ? "var(--primary-blue)"
+                  : "var(--card-grey)",
               border: "none",
-              cursor: inputValue.trim() ? "pointer" : "not-allowed",
+              cursor:
+                inputValue.trim() && !isTyping ? "pointer" : "not-allowed",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -296,7 +359,10 @@ export function AIAssistantScreen() {
             <Send
               size={20}
               style={{
-                color: inputValue.trim() ? "white" : "var(--muted-text)",
+                color:
+                  inputValue.trim() && !isTyping
+                    ? "white"
+                    : "var(--muted-text)",
               }}
             />
           </button>

@@ -1,29 +1,62 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { ROUTES } from "../constants/paths";
 
 export function SignInScreen() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const { login, isLoading, isAuthenticated } = useAuth();
+  const { login, isLoading, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/home");
+      navigate(ROUTES.HOME);
     }
   }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (!username.trim() || !password.trim()) {
+      setError("Please enter both username and password");
+      return;
+    }
+
     try {
-      await login(email, password);
-      navigate("/home");
-    } catch (err) {
-      setError("Login failed. Please try again.");
+      // Login and store user (handled by AuthContext)
+      // This will:
+      // 1. Call authService.login()
+      // 2. Store tokens via setSession()
+      // 3. Store user data in localStorage under "hospital_ai_auth"
+      // 4. Update user state via setUser()
+      await login(username.trim(), password);
+
+      // Verify user is stored in localStorage
+      const storedAuth = localStorage.getItem("hospital_ai_auth");
+      if (!storedAuth) {
+        throw new Error("Failed to store user data");
+      }
+
+      const authData = JSON.parse(storedAuth);
+      console.log("✅ User stored successfully:", {
+        id: authData.user?.id,
+        username: authData.user?.username,
+        name: authData.user?.name,
+        role: authData.user?.role,
+      });
+
+      // Navigate to home - user is now stored and authenticated
+      navigate(ROUTES.HOME);
+    } catch (err: any) {
+      const errorMessage =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Login failed. Please try again.";
+      setError(errorMessage);
     }
   };
 
@@ -42,27 +75,32 @@ export function SignInScreen() {
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
               <label
-                htmlFor="email"
+                htmlFor="username"
                 className="caption block mb-2"
                 style={{ color: "var(--dark-text)" }}
               >
-                Email
+                Username
               </label>
               <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your.email@example.com"
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter your username"
                 required
+                autoComplete="username"
+                disabled={isLoading}
                 style={{
                   width: "100%",
                   padding: "12px 16px",
                   borderRadius: "12px",
                   border: "1px solid var(--border-grey)",
-                  backgroundColor: "var(--bg-light)",
+                  backgroundColor: isLoading
+                    ? "var(--card-grey)"
+                    : "var(--bg-light)",
                   fontSize: "15px",
                   outline: "none",
+                  transition: "background-color 0.2s",
                 }}
               />
             </div>
@@ -82,14 +120,19 @@ export function SignInScreen() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
                 required
+                autoComplete="current-password"
+                disabled={isLoading}
                 style={{
                   width: "100%",
                   padding: "12px 16px",
                   borderRadius: "12px",
                   border: "1px solid var(--border-grey)",
-                  backgroundColor: "var(--bg-light)",
+                  backgroundColor: isLoading
+                    ? "var(--card-grey)"
+                    : "var(--bg-light)",
                   fontSize: "15px",
                   outline: "none",
+                  transition: "background-color 0.2s",
                 }}
               />
             </div>
