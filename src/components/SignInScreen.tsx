@@ -1,16 +1,23 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
-interface SignInScreenProps {
-  onSignIn: () => void;
-}
-
-export function SignInScreen({ onSignIn }: SignInScreenProps) {
+export function SignInScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const { login, isLoading } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSignIn();
+    setError('');
+    try {
+      await login(email, password);
+      navigate('/home');
+    } catch (err) {
+      setError('Login failed. Please try again.');
+    }
   };
 
   return (
@@ -93,21 +100,28 @@ export function SignInScreen({ onSignIn }: SignInScreenProps) {
               </button>
             </div>
 
+            {error && (
+              <div className="mb-4 p-3 rounded-lg" style={{ backgroundColor: '#FEE2E2', color: '#DC2626' }}>
+                {error}
+              </div>
+            )}
+
             <button
               type="submit"
+              disabled={isLoading}
               style={{
                 width: '100%',
-                backgroundColor: 'var(--primary-blue)',
+                backgroundColor: isLoading ? '#94A3B8' : 'var(--primary-blue)',
                 color: 'white',
                 padding: '16px',
                 borderRadius: '12px',
                 border: 'none',
-                cursor: 'pointer',
+                cursor: isLoading ? 'not-allowed' : 'pointer',
                 fontSize: '16px',
                 fontWeight: '500',
               }}
             >
-              Sign In
+              {isLoading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
         </div>
