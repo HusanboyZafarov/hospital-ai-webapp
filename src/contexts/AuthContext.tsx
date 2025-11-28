@@ -60,10 +60,15 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
     setIsLoading(true);
     try {
       // Call auth service to get REAL user data from API
-      const apiResponse: ApiAuthResponse = await authService.login(
-        username,
-        password
-      );
+      const response = await authService.login(username, password);
+
+      // Log the response to debug
+      console.log("🔍 Raw API response:", response);
+      console.log("🔍 Response keys:", Object.keys(response || {}));
+
+      // Handle response - axiosInstance returns the full response, extract data
+      // The response might be the data directly or wrapped in response.data
+      const apiResponse: ApiAuthResponse = (response as any)?.data || response;
 
       // Validate API response structure
       if (
@@ -72,6 +77,13 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
         !apiResponse.access ||
         !apiResponse.refresh
       ) {
+        console.error("❌ Invalid API response structure:", {
+          hasResponse: !!apiResponse,
+          hasUser: !!apiResponse?.user,
+          hasAccess: !!apiResponse?.access,
+          hasRefresh: !!apiResponse?.refresh,
+          responseKeys: apiResponse ? Object.keys(apiResponse) : [],
+        });
         throw new Error(
           "Invalid API response: missing user, access, or refresh token"
         );

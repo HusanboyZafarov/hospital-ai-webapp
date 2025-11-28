@@ -66,12 +66,15 @@ export function AIAssistantScreen() {
       // Call real AI chat API
       const response = await aiChatService.postChat(question);
 
+      console.log("🔍 AI Chat response:", response);
+
       const aiResponse: Message = {
         id: Date.now() + 1,
         type: "ai",
         text:
-          response?.data?.answer ||
-          response?.data?.response ||
+          response?.answer ||
+          response?.response ||
+          response?.message ||
           "I understand your question. Based on your current recovery plan and health status, let me provide you with personalized guidance. Always remember to consult your doctor for specific medical advice.",
         time: new Date().toLocaleTimeString("en-US", {
           hour: "numeric",
