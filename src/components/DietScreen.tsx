@@ -24,16 +24,22 @@ interface Meal {
 }
 
 interface DietPlanData {
+  id?: number;
+  summary?: string;
   diet_type?: string;
-  daily_calories?: string;
-  doctor_note?: string;
-  meals?: Array<{
+  goal_calories?: number;
+  protein_target?: string;
+  notes?: string;
+  allowed_foods?: Array<{
+    id: number;
     name: string;
-    time: string;
-    foods: string[];
+    description?: string;
   }>;
-  allowed_foods?: string[];
-  forbidden_foods?: string[];
+  forbidden_foods?: Array<{
+    id: number;
+    name: string;
+    description?: string;
+  }>;
 }
 
 export function DietScreen({ onAskAI }: DietScreenProps) {
@@ -121,45 +127,12 @@ export function DietScreen({ onAskAI }: DietScreenProps) {
     },
   ];
 
-  // Map API meals to UI format with icons
-  const getMealsWithIcons = (): Meal[] => {
-    if (dietData?.meals && dietData.meals.length > 0) {
-      const iconMap: Record<string, typeof Coffee> = {
-        breakfast: Coffee,
-        nonushta: Coffee,
-        lunch: Sun,
-        tushlik: Sun,
-        dinner: Moon,
-        "kechki ovqat": Moon,
-        snack: Cookie,
-        "qo'shimcha ovqatlar": Cookie,
-      };
-
-      return dietData.meals.map((meal) => {
-        const mealNameLower = meal.name.toLowerCase();
-        let icon = Coffee; // default
-        for (const [key, iconValue] of Object.entries(iconMap)) {
-          if (mealNameLower.includes(key)) {
-            icon = iconValue;
-            break;
-          }
-        }
-        return {
-          icon,
-          name: meal.name,
-          time: meal.time,
-          foods: meal.foods || [],
-        };
-      });
-    }
-    return defaultMeals;
-  };
-
-  const meals = getMealsWithIcons();
+  // Use default meals since API doesn't return meals
+  const meals = defaultMeals;
 
   const allowedFoods =
     dietData?.allowed_foods && dietData.allowed_foods.length > 0
-      ? dietData.allowed_foods
+      ? dietData.allowed_foods.map((food) => food.name)
       : [
           "Yengil oqsil (tovuq, baliq, kurka)",
           "To'liq donlar (jigarrang guruch, kinoa, yulka)",
@@ -171,7 +144,7 @@ export function DietScreen({ onAskAI }: DietScreenProps) {
 
   const forbiddenFoods =
     dietData?.forbidden_foods && dietData.forbidden_foods.length > 0
-      ? dietData.forbidden_foods
+      ? dietData.forbidden_foods.map((food) => food.name)
       : [
           "Achchiq ovqatlar",
           "Spirtli ichimliklar",
@@ -197,6 +170,9 @@ export function DietScreen({ onAskAI }: DietScreenProps) {
           padding: "16px",
           paddingTop: "24px",
           borderBottom: "1px solid var(--border-grey)",
+          position: "sticky",
+          top: 0,
+          zIndex: 100,
         }}
       >
         <h2>Ovqatlanish rejasi</h2>
@@ -264,9 +240,41 @@ export function DietScreen({ onAskAI }: DietScreenProps) {
                   style={{ display: "flex", justifyContent: "space-between" }}
                 >
                   <p style={{ color: "var(--muted-text)" }}>Kunlik kaloriya</p>
-                  <p>{dietData?.daily_calories || "1800-2000 kcal"}</p>
+                  <p>
+                    {dietData?.goal_calories
+                      ? `${dietData.goal_calories} kcal`
+                      : "1800-2000 kcal"}
+                  </p>
                 </div>
-                {dietData?.doctor_note && (
+                {dietData?.protein_target && (
+                  <div
+                    style={{ display: "flex", justifyContent: "space-between" }}
+                  >
+                    <p style={{ color: "var(--muted-text)" }}>Oqsil maqsadi</p>
+                    <p>{dietData.protein_target}</p>
+                  </div>
+                )}
+                {dietData?.summary && (
+                  <div
+                    style={{
+                      padding: "12px",
+                      backgroundColor: "var(--bg-light)",
+                      borderRadius: "8px",
+                      marginTop: "8px",
+                    }}
+                  >
+                    <p
+                      className="caption"
+                      style={{
+                        color: "var(--muted-text)",
+                        marginBottom: "4px",
+                      }}
+                    >
+                      <strong>Xulosa:</strong> {dietData.summary}
+                    </p>
+                  </div>
+                )}
+                {dietData?.notes && (
                   <div
                     style={{
                       padding: "12px",
@@ -279,7 +287,7 @@ export function DietScreen({ onAskAI }: DietScreenProps) {
                       className="caption"
                       style={{ color: "var(--muted-text)" }}
                     >
-                      Shifokor eslatmasi: {dietData.doctor_note}
+                      Shifokor eslatmasi: {dietData.notes}
                     </p>
                   </div>
                 )}

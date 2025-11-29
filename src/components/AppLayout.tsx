@@ -1,6 +1,7 @@
 import React from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
+import { User } from "lucide-react";
 
 export const AppLayout: React.FC = () => {
   const navigate = useNavigate();
@@ -76,7 +77,7 @@ export const AppLayout: React.FC = () => {
             zIndex: 10,
           }}
         >
-          MA
+          <User size={20} />
         </button>
       )}
     </div>

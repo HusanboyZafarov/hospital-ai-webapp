@@ -12,7 +12,7 @@ import {
 import { activitiesService } from "../service/activities";
 
 interface ActivitiesScreenProps {
-  onAskAI: () => void;
+  onAskAI: (query?: string) => void;
 }
 
 interface Activity {
@@ -22,17 +22,19 @@ interface Activity {
 }
 
 interface ActivitiesData {
-  allowed_activities?: Array<{
+  id?: number;
+  notes?: string;
+  allowed?: Array<{
+    id: number;
     name: string;
-    description: string;
-    type?: string;
+    description?: string;
   }>;
-  restricted_activities?: Array<{
+  restricted?: Array<{
+    id: number;
     name: string;
-    description: string;
-    type?: string;
+    description?: string;
   }>;
-  guidelines?: string[];
+  general_guidelines?: string[];
 }
 
 export function ActivitiesScreen({ onAskAI }: ActivitiesScreenProps) {
@@ -133,9 +135,8 @@ export function ActivitiesScreen({ onAskAI }: ActivitiesScreenProps) {
 
   // Map API activities to UI format
   const allowedActivities: Activity[] =
-    activitiesData?.allowed_activities &&
-    activitiesData.allowed_activities.length > 0
-      ? activitiesData.allowed_activities.map((activity) => ({
+    activitiesData?.allowed && activitiesData.allowed.length > 0
+      ? activitiesData.allowed.map((activity) => ({
           icon: getIconForActivity(activity.name, true),
           name: activity.name,
           description: activity.description || "",
@@ -143,9 +144,8 @@ export function ActivitiesScreen({ onAskAI }: ActivitiesScreenProps) {
       : defaultAllowedActivities;
 
   const restrictedActivities: Activity[] =
-    activitiesData?.restricted_activities &&
-    activitiesData.restricted_activities.length > 0
-      ? activitiesData.restricted_activities.map((activity) => ({
+    activitiesData?.restricted && activitiesData.restricted.length > 0
+      ? activitiesData.restricted.map((activity) => ({
           icon: getIconForActivity(activity.name, false),
           name: activity.name,
           description: activity.description || "",
@@ -153,8 +153,9 @@ export function ActivitiesScreen({ onAskAI }: ActivitiesScreenProps) {
       : defaultRestrictedActivities;
 
   const guidelines =
-    activitiesData?.guidelines && activitiesData.guidelines.length > 0
-      ? activitiesData.guidelines
+    activitiesData?.general_guidelines &&
+    activitiesData.general_guidelines.length > 0
+      ? activitiesData.general_guidelines
       : [
           "Asta-sekin boshlang va faoliyatni bosqichma-bosqich oshiring",
           "Agar og'riq yoki noqulaylik sezsangiz, to'xtating",
@@ -164,7 +165,7 @@ export function ActivitiesScreen({ onAskAI }: ActivitiesScreenProps) {
 
   const handleAskAI = () => {
     if (activityQuery.trim()) {
-      onAskAI();
+      onAskAI(activityQuery.trim());
     }
   };
 
@@ -429,6 +430,33 @@ export function ActivitiesScreen({ onAskAI }: ActivitiesScreenProps) {
                 })}
               </div>
             </div>
+
+            {/* Notes */}
+            {activitiesData?.notes && (
+              <div
+                style={{
+                  backgroundColor: "#E0F2FE",
+                  borderLeft: "4px solid var(--primary-blue)",
+                  borderRadius: "12px",
+                  padding: "16px",
+                  marginBottom: "24px",
+                }}
+              >
+                <h3 style={{ marginBottom: "8px", color: "#0C4A6E" }}>
+                  Shifokor eslatmasi
+                </h3>
+                <p
+                  style={{
+                    fontSize: "14px",
+                    color: "#0C4A6E",
+                    margin: 0,
+                    lineHeight: "1.5",
+                  }}
+                >
+                  {activitiesData.notes}
+                </p>
+              </div>
+            )}
 
             {/* General Guidelines */}
             <div

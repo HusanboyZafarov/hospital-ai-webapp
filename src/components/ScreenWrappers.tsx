@@ -38,7 +38,17 @@ export const DietScreenWrapper = () => {
 
 export const ActivitiesScreenWrapper = () => {
   const navigate = useNavigate();
-  return <ActivitiesScreen onAskAI={() => navigate("/ai-assistant")} />;
+  return (
+    <ActivitiesScreen
+      onAskAI={(query) => {
+        if (query) {
+          navigate(`/ai-assistant?q=${encodeURIComponent(query)}`);
+        } else {
+          navigate("/ai-assistant");
+        }
+      }}
+    />
+  );
 };
 
 export const CarePlanScreenWrapper = () => {
