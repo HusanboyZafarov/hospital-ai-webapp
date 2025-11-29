@@ -15,18 +15,21 @@ export function OnboardingScreen({
   const screens = [
     {
       icon: Heart,
-      title: "Your Personal Recovery Companion",
-      subtitle: "Track meds, diet, activities and recovery easily.",
+      title: "Sizning shaxsiy tiklanish yordamchingiz",
+      subtitle:
+        "Dori-darmonlar, ovqatlanish, faoliyatlar va tiklanishni osonlik bilan kuzatib boring.",
     },
     {
       icon: Brain,
-      title: "Smart Recovery",
-      subtitle: "AI helps you follow your care plan safely.",
+      title: "Aqlli tiklanish",
+      subtitle:
+        "AI sizga parvarish rejangizni xavfsiz ravishda bajarishda yordam beradi.",
     },
     {
       icon: CheckCircle,
-      title: "Stay on Track",
-      subtitle: "Reminders, alerts, instructions — all in one place.",
+      title: "Rejada qoling",
+      subtitle:
+        "Eslatmalar, ogohlantirishlar, ko'rsatmalar — hammasi bir joyda.",
     },
   ];
 
@@ -90,7 +93,7 @@ export function OnboardingScreen({
             fontWeight: "500",
           }}
         >
-          {step === screens.length - 1 ? "Continue" : "Get Started"}
+          {step === screens.length - 1 ? "Davom etish" : "Boshlash"}
         </button>
       </div>
     </div>

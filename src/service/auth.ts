@@ -6,7 +6,7 @@ const login = async (
   password: string
 ): Promise<ApiAuthResponse> => {
   try {
-    const response = await axiosInstance.post<ApiAuthResponse>("/auth/login", {
+    const response = await axiosInstance.post<ApiAuthResponse>("/auth/login/", {
       username,
       password,
     });

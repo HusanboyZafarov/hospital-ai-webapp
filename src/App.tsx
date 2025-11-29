@@ -12,11 +12,9 @@ import { SignInScreen } from "./components/SignInScreen";
 import {
   HomeScreenWrapper,
   MedicationsScreenWrapper,
-  MedicationScheduleScreenWrapper,
   DietScreenWrapper,
   ActivitiesScreenWrapper,
   CarePlanScreenWrapper,
-  AppointmentsScreenWrapper,
   AIAssistantScreenWrapper,
   ProfileScreenWrapper,
 } from "./components/ScreenWrappers";
@@ -57,14 +55,14 @@ function AppRoutes() {
       >
         <Route path="/home" element={<HomeScreenWrapper />} />
         <Route path="/medications" element={<MedicationsScreenWrapper />} />
-        <Route
+        {/* <Route
           path="/medication-schedule"
           element={<MedicationScheduleScreenWrapper />}
-        />
+        /> */}
         <Route path="/diet" element={<DietScreenWrapper />} />
         <Route path="/activities" element={<ActivitiesScreenWrapper />} />
         <Route path="/care-plan" element={<CarePlanScreenWrapper />} />
-        <Route path="/appointments" element={<AppointmentsScreenWrapper />} />
+        {/* <Route path="/appointments" element={<AppointmentsScreenWrapper />} /> */}
         <Route path="/ai-assistant" element={<AIAssistantScreenWrapper />} />
         <Route path="/profile" element={<ProfileScreenWrapper />} />
 

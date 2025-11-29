@@ -22,7 +22,7 @@ export function SignInScreen() {
     setError("");
 
     if (!username.trim() || !password.trim()) {
-      setError("Please enter both username and password");
+      setError("Iltimos, foydalanuvchi nomi va parolni kiriting");
       return;
     }
 
@@ -55,7 +55,7 @@ export function SignInScreen() {
       const errorMessage =
         err?.response?.data?.message ||
         err?.message ||
-        "Login failed. Please try again.";
+        "Kirish muvaffaqiyatsiz. Iltimos, qayta urinib ko'ring.";
       setError(errorMessage);
     }
   };
@@ -67,9 +67,9 @@ export function SignInScreen() {
     >
       <div className="flex-1 flex flex-col justify-center px-4">
         <div className="max-w-sm mx-auto w-full">
-          <h1 className="mb-2">Sign In</h1>
+          <h1 className="mb-2">Kirish</h1>
           <p style={{ color: "var(--muted-text)", marginBottom: "32px" }}>
-            Welcome back to your recovery companion
+            Hospital AI yordamchingizga xush kelibsiz
           </p>
 
           <form onSubmit={handleSubmit}>
@@ -79,14 +79,14 @@ export function SignInScreen() {
                 className="caption block mb-2"
                 style={{ color: "var(--dark-text)" }}
               >
-                Username
+                Foydalanuvchi nomi
               </label>
               <input
                 id="username"
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter your username"
+                placeholder="Foydalanuvchi nomingizni kiriting"
                 required
                 autoComplete="username"
                 disabled={isLoading}
@@ -111,14 +111,14 @@ export function SignInScreen() {
                 className="caption block mb-2"
                 style={{ color: "var(--dark-text)" }}
               >
-                Password
+                Parol
               </label>
               <input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
+                placeholder="Parolingizni kiriting"
                 required
                 autoComplete="current-password"
                 disabled={isLoading}
@@ -149,7 +149,7 @@ export function SignInScreen() {
                   padding: "4px 0",
                 }}
               >
-                Forgot password?
+                Parolni unutdingizmi?
               </button>
             </div>
 
@@ -177,7 +177,7 @@ export function SignInScreen() {
                 fontWeight: "500",
               }}
             >
-              {isLoading ? "Signing in..." : "Sign In"}
+              {isLoading ? "Kirilmoqda..." : "Kirish"}
             </button>
           </form>
         </div>
@@ -187,7 +187,7 @@ export function SignInScreen() {
         className="text-center pb-8 caption"
         style={{ color: "var(--muted-text)" }}
       >
-        Powered by Hospital AI System
+        Hospital AI System tomonidan yaratilgan
       </div>
     </div>
   );

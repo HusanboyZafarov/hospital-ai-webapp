@@ -2,11 +2,9 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { HomeScreen } from "./HomeScreen";
 import { MedicationsScreen } from "./MedicationsScreen";
-import { MedicationScheduleScreen } from "./MedicationScheduleScreen";
 import { DietScreen } from "./DietScreen";
 import { ActivitiesScreen } from "./ActivitiesScreen";
 import { CarePlanScreen } from "./CarePlanScreen";
-import { AppointmentsScreen } from "./AppointmentsScreen";
 import { AIAssistantScreen } from "./AIAssistantScreen";
 import { ProfileScreen } from "./ProfileScreen";
 import { useAuth } from "../contexts/AuthContext";
@@ -31,11 +29,6 @@ export const MedicationsScreenWrapper = () => {
       onViewSchedule={() => navigate("/medication-schedule")}
     />
   );
-};
-
-export const MedicationScheduleScreenWrapper = () => {
-  const navigate = useNavigate();
-  return <MedicationScheduleScreen onBack={() => navigate("/medications")} />;
 };
 
 export const DietScreenWrapper = () => {
@@ -68,10 +61,6 @@ export const ProfileScreenWrapper = () => {
       onViewCarePlan={() => navigate("/care-plan")}
     />
   );
-};
-
-export const AppointmentsScreenWrapper = () => {
-  return <AppointmentsScreen />;
 };
 
 export const AIAssistantScreenWrapper = () => {

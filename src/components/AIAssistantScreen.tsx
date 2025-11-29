@@ -18,6 +18,7 @@ export function AIAssistantScreen() {
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Initialize with welcome message
   useEffect(() => {
@@ -25,7 +26,7 @@ export function AIAssistantScreen() {
       const welcomeMessage: Message = {
         id: 1,
         type: "ai",
-        text: `Hi ${userName}! I'm your AI recovery assistant. I can help you with questions about your medications, diet, activities, and symptoms. How can I help you today?`,
+        text: `Salom ${userName}! Men sizning AI tiklanish yordamchingizman. Men sizga dori-darmonlar, ovqatlanish, faoliyatlar va alomatlar haqidagi savollaringizda yordam bera olaman. Bugun qanday yordam bera olaman?`,
         time: new Date().toLocaleTimeString("en-US", {
           hour: "numeric",
           minute: "2-digit",
@@ -59,6 +60,10 @@ export function AIAssistantScreen() {
 
     setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
+    // Reset textarea height
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
     setIsTyping(true);
     setError("");
 
@@ -75,7 +80,7 @@ export function AIAssistantScreen() {
           response?.answer ||
           response?.response ||
           response?.message ||
-          "I understand your question. Based on your current recovery plan and health status, let me provide you with personalized guidance. Always remember to consult your doctor for specific medical advice.",
+          "Men sizning savolingizni tushundim. Joriy tiklanish rejangiz va salomatlik holatingizga asoslanib, sizga shaxsiy ko'rsatmalar beraman. Har doim aniq tibbiy maslahat uchun shifokoringizga murojaat qiling.",
         time: new Date().toLocaleTimeString("en-US", {
           hour: "numeric",
           minute: "2-digit",
@@ -88,13 +93,13 @@ export function AIAssistantScreen() {
       const errorMessage =
         err?.response?.data?.message ||
         err?.message ||
-        "Sorry, I'm having trouble connecting. Please try again.";
+        "Kechirasiz, ulanishda muammo bor. Iltimos, qayta urinib ko'ring.";
       setError(errorMessage);
 
       const errorResponse: Message = {
         id: Date.now() + 1,
         type: "ai",
-        text: `Sorry, I encountered an error: ${errorMessage}. Please try again or contact your healthcare provider for immediate assistance.`,
+        text: `Kechirasiz, xatolik yuz berdi: ${errorMessage}. Iltimos, qayta urinib ko'ring yoki darhol yordam olish uchun sog'liqni saqlash xizmatlari provayderingizga murojaat qiling.`,
         time: new Date().toLocaleTimeString("en-US", {
           hour: "numeric",
           minute: "2-digit",
@@ -114,10 +119,10 @@ export function AIAssistantScreen() {
   };
 
   const suggestions = [
-    "Explain my medication schedule",
-    "What foods should I avoid?",
-    "Can I exercise today?",
-    "I have a headache, what should I do?",
+    "Dori-darmonlar jadvalimni tushuntirib bering",
+    "Qanday ovqatlardan saqlanishim kerak?",
+    "Bugun mashq qilishim mumkinmi?",
+    "Boshim og'riyapti, nima qilishim kerak?",
   ];
 
   return (
@@ -136,11 +141,14 @@ export function AIAssistantScreen() {
           padding: "16px",
           paddingTop: "24px",
           borderBottom: "1px solid var(--border-grey)",
+          position: "sticky",
+          top: 0,
+          zIndex: 100,
         }}
       >
-        <h2>Ask AI</h2>
+        <h2>AI dan so'rang</h2>
         <p style={{ color: "var(--muted-text)", marginTop: "4px" }}>
-          Your personal health assistant
+          Sizning shaxsiy salomatlik yordamchingiz
         </p>
       </div>
 
@@ -150,7 +158,7 @@ export function AIAssistantScreen() {
           flex: 1,
           overflowY: "auto",
           padding: "16px",
-          paddingBottom: "88px",
+          paddingBottom: "160px",
         }}
       >
         {messages.map((message) => (
@@ -175,9 +183,19 @@ export function AIAssistantScreen() {
                 color: message.type === "user" ? "white" : "var(--dark-text)",
                 boxShadow:
                   message.type === "ai" ? "0 2px 8px rgba(0,0,0,0.05)" : "none",
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
               }}
             >
-              <p style={{ marginBottom: "4px" }}>{message.text}</p>
+              <p
+                style={{
+                  marginBottom: "4px",
+                  lineHeight: "1.5",
+                  whiteSpace: "pre-wrap",
+                }}
+              >
+                {message.text}
+              </p>
               <p
                 className="caption"
                 style={{
@@ -186,6 +204,7 @@ export function AIAssistantScreen() {
                       ? "rgba(255,255,255,0.7)"
                       : "var(--muted-text)",
                   fontSize: "12px",
+                  marginTop: "4px",
                 }}
               >
                 {message.time}
@@ -252,7 +271,7 @@ export function AIAssistantScreen() {
               className="caption"
               style={{ color: "var(--muted-text)", marginBottom: "8px" }}
             >
-              Quick suggestions:
+              Tezkor takliflar:
             </p>
             <div
               style={{ display: "flex", flexDirection: "column", gap: "8px" }}
@@ -317,10 +336,21 @@ export function AIAssistantScreen() {
       >
         <div style={{ display: "flex", gap: "8px", alignItems: "flex-end" }}>
           <textarea
+            ref={textareaRef}
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={(e) => {
+              setInputValue(e.target.value);
+              // Auto-resize textarea
+              if (textareaRef.current) {
+                textareaRef.current.style.height = "auto";
+                textareaRef.current.style.height = `${Math.min(
+                  textareaRef.current.scrollHeight,
+                  100
+                )}px`;
+              }
+            }}
             onKeyPress={handleKeyPress}
-            placeholder="Ask me anything..."
+            placeholder="Menga istalgan narsani so'rang..."
             rows={1}
             disabled={isTyping}
             style={{
@@ -336,7 +366,10 @@ export function AIAssistantScreen() {
               resize: "none",
               fontFamily: "Inter, sans-serif",
               maxHeight: "100px",
+              minHeight: "48px",
+              overflowY: "auto",
               cursor: isTyping ? "not-allowed" : "text",
+              lineHeight: "1.5",
             }}
           />
           <button

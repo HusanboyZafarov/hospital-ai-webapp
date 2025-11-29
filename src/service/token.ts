@@ -1,4 +1,4 @@
-import { ACCESS_TOKEN, REFRESH_TOKEN } from "@/jwt";
+import { ACCESS_TOKEN, REFRESH_TOKEN } from "../jwt";
 
 const getTokens = () => ({
   accessToken: localStorage.getItem(ACCESS_TOKEN),
