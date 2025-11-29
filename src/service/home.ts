@@ -12,7 +12,7 @@ const getHome = () =>
 
 const taskStatus = (taskId: number, completed: boolean) =>
   axiosInstance
-    .post(`${endpoint}/task-status/${taskId}/`, { completed })
+    .patch(`${endpoint}/home/tasks/${taskId}`, { completed })
     .then((res) => res.data)
     .catch((err) => {
       console.error("Task status error:", err);
