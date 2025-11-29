@@ -19,7 +19,7 @@ interface HomeScreenProps {
 
 interface Task {
   id: number;
-  title: string;
+  label: string;
   completed: boolean;
 }
 
@@ -37,7 +37,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
       setError("");
       try {
         const response = await homeService.getHome();
-        // Handle API response - adjust based on actual API structure
+        // Handle API response - tasks array with label field
         if (response?.tasks && Array.isArray(response.tasks)) {
           setTasks(response.tasks);
         } else if (Array.isArray(response)) {
@@ -47,27 +47,28 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
           setTasks([
             {
               id: 1,
-              title: "Ertalabki dori-darmonlarni ichish",
-              completed: true,
+              label: "Ertalabki dori-darmonni qabul qiling.",
+              completed: false,
             },
             {
               id: 2,
-              title: "Nonushta - Ovqatlanish rejasiga rioya qilish",
-              completed: true,
+              label:
+                "Ovqatlanish rejasiga rioya qiling, sog'lom ovqatlar tanlang.",
+              completed: false,
             },
             {
               id: 3,
-              title: "Tushdan keyingi dori-darmonlarni ichish",
+              label: "Tushdan keyin dori-darmonni qabul qiling.",
               completed: false,
             },
             {
               id: 4,
-              title: "Og'ir jismoniy mashqlardan saqlanish",
+              label: "Jiddiy faoliyatlardan qoching va dam oling.",
               completed: false,
             },
             {
               id: 5,
-              title: "Kechki dori-darmonlarni eslatma",
+              label: "Kechki dori-darmon eslatmasini unutmang.",
               completed: false,
             },
           ]);
@@ -79,25 +80,30 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
         setTasks([
           {
             id: 1,
-            title: "Ertalabki dori-darmonlarni ichish",
-            completed: true,
+            label: "Ertalabki dori-darmonni qabul qiling.",
+            completed: false,
           },
           {
             id: 2,
-            title: "Nonushta - Ovqatlanish rejasiga rioya qilish",
-            completed: true,
+            label:
+              "Ovqatlanish rejasiga rioya qiling, sog'lom ovqatlar tanlang.",
+            completed: false,
           },
           {
             id: 3,
-            title: "Tushdan keyingi dori-darmonlarni ichish",
+            label: "Tushdan keyin dori-darmonni qabul qiling.",
             completed: false,
           },
           {
             id: 4,
-            title: "Og'ir jismoniy mashqlardan saqlanish",
+            label: "Jiddiy faoliyatlardan qoching va dam oling.",
             completed: false,
           },
-          { id: 5, title: "Kechki dori-darmonlarni eslatma", completed: false },
+          {
+            id: 5,
+            label: "Kechki dori-darmon eslatmasini unutmang.",
+            completed: false,
+          },
         ]);
       } finally {
         setIsLoadingTasks(false);
@@ -449,7 +455,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
                       textDecoration: task.completed ? "line-through" : "none",
                     }}
                   >
-                    {task.title}
+                    {task.label}
                   </p>
                 </button>
               ))}
