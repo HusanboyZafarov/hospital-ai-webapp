@@ -1,77 +1,73 @@
-import React, { useState } from "react";
-import { Clock, Check, X, Calendar } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Clock, Check, X, Calendar, Loader2 } from "lucide-react";
+import { medicineService } from "../service/medicine";
 
 interface MedicationsScreenProps {
   onViewSchedule: () => void;
 }
 
+interface Medication {
+  id: number;
+  name: string;
+  dosage: string;
+  period: string;
+  times: number;
+}
+
 export function MedicationsScreen({ onViewSchedule }: MedicationsScreenProps) {
-  const [medications, setMedications] = useState([
-    {
-      id: 1,
-      name: "Amoxicillin",
-      dosage: "500mg",
-      time: "8:00 AM",
-      status: "taken",
-    },
-    {
-      id: 2,
-      name: "Ibuprofen",
-      dosage: "400mg",
-      time: "2:00 PM",
-      status: "upcoming",
-    },
-    {
-      id: 3,
-      name: "Vitamin D",
-      dosage: "1000 IU",
-      time: "8:00 PM",
-      status: "upcoming",
-    },
-  ]);
+  const [medications, setMedications] = useState<Medication[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const markAsTaken = (id: number) => {
-    setMedications(
-      medications.map((med) =>
-        med.id === id ? { ...med, status: "taken" } : med
-      )
-    );
-  };
+  // Fetch medications from API on mount
+  useEffect(() => {
+    const fetchMedications = async () => {
+      setIsLoading(true);
+      setError("");
+      try {
+        const response = await medicineService.getMedications();
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "taken":
-        return "var(--success-green)";
-      case "missed":
-        return "var(--error-red)";
-      default:
-        return "var(--muted-text)";
-    }
-  };
+        // Check if response has error detail
+        if (response?.detail) {
+          setError(response.detail);
+          setMedications([]);
+          return;
+        }
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "taken":
-        return <Check size={16} />;
-      case "missed":
-        return <X size={16} />;
-      default:
-        return <Clock size={16} />;
-    }
-  };
+        // Handle API response - adjust based on actual API structure
+        if (response?.medications && Array.isArray(response.medications)) {
+          setMedications(response.medications);
+        } else if (Array.isArray(response)) {
+          setMedications(response);
+        } else if (response?.data && Array.isArray(response.data)) {
+          setMedications(response.data);
+        } else {
+          // No medications found
+          setMedications([]);
+        }
+      } catch (err: any) {
+        console.error("Error fetching medications:", err);
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "taken":
-        return "Taken";
-      case "missed":
-        return "Missed";
-      default:
-        return "Upcoming";
-    }
-  };
+        // Extract error message from API response
+        let errorMessage = "Failed to load medications";
 
-  const timelineHours = ["8 AM", "12 PM", "2 PM", "6 PM", "8 PM"];
+        if (err?.response?.data?.detail) {
+          errorMessage = err.response.data.detail;
+        } else if (err?.response?.data?.message) {
+          errorMessage = err.response.data.message;
+        } else if (err?.message) {
+          errorMessage = err.message;
+        }
+
+        setError(errorMessage);
+        setMedications([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMedications();
+  }, []);
 
   return (
     <div
@@ -88,170 +84,147 @@ export function MedicationsScreen({ onViewSchedule }: MedicationsScreenProps) {
           padding: "16px",
           paddingTop: "24px",
           borderBottom: "1px solid var(--border-grey)",
+          position: "sticky",
+          top: 0,
+          zIndex: 100,
         }}
       >
-        <h2>Medications</h2>
+        <h2>Dori-darmonlar</h2>
       </div>
 
       <div style={{ padding: "16px" }}>
         {/* Today's Medications */}
         <div style={{ marginBottom: "24px" }}>
-          <h3 style={{ marginBottom: "12px" }}>Today's Medication</h3>
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "12px" }}
-          >
-            {medications.map((med) => (
-              <div
-                key={med.id}
-                style={{
-                  backgroundColor: "var(--bg-white)",
-                  borderRadius: "16px",
-                  padding: "16px",
-                  boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
-                }}
-              >
+          <h3 style={{ marginBottom: "12px" }}>Bugungi dori-darmonlar</h3>
+
+          {isLoading ? (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "40px",
+                gap: "12px",
+                color: "var(--muted-text)",
+              }}
+            >
+              <Loader2
+                size={20}
+                style={{ animation: "spin 1s linear infinite" }}
+              />
+              <span>Dori-darmonlar yuklanmoqda...</span>
+            </div>
+          ) : error ? (
+            <div
+              style={{
+                padding: "16px",
+                backgroundColor: "#FEE2E2",
+                color: "#DC2626",
+                borderRadius: "12px",
+                fontSize: "14px",
+                lineHeight: "1.5",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              <X size={20} style={{ flexShrink: 0 }} />
+              <span>{error}</span>
+            </div>
+          ) : medications.length === 0 ? (
+            <div
+              style={{
+                padding: "40px",
+                textAlign: "center",
+                color: "var(--muted-text)",
+              }}
+            >
+              <p>Bugun dori-darmonlar yo'q</p>
+            </div>
+          ) : (
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+            >
+              {medications.map((med) => (
                 <div
+                  key={med.id}
                   style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "start",
-                    marginBottom: "12px",
+                    backgroundColor: "var(--bg-white)",
+                    borderRadius: "16px",
+                    padding: "16px",
+                    boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
                   }}
                 >
-                  <div>
-                    <h3 style={{ marginBottom: "4px" }}>{med.name}</h3>
-                    <p style={{ color: "var(--muted-text)" }}>{med.dosage}</p>
-                  </div>
                   <div
                     style={{
                       display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
-                      padding: "6px 12px",
-                      borderRadius: "8px",
-                      backgroundColor: getStatusColor(med.status) + "15",
-                      color: getStatusColor(med.status),
+                      justifyContent: "space-between",
+                      alignItems: "start",
                     }}
-                    className="caption"
                   >
-                    {getStatusIcon(med.status)}
-                    {getStatusText(med.status)}
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{ marginBottom: "4px", fontWeight: "600" }}>
+                        {med.name}
+                      </h3>
+                      <p
+                        style={{
+                          color: "var(--muted-text)",
+                          fontSize: "14px",
+                          marginBottom: "4px",
+                        }}
+                      >
+                        {med.dosage}
+                      </p>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "12px",
+                          marginTop: "8px",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <span
+                          style={{
+                            color: "var(--muted-text)",
+                            fontSize: "13px",
+                            backgroundColor: "var(--bg-light)",
+                            padding: "4px 8px",
+                            borderRadius: "6px",
+                          }}
+                        >
+                          {med.times} marta
+                        </span>
+                        <span
+                          style={{
+                            color: "var(--muted-text)",
+                            fontSize: "13px",
+                            backgroundColor: "var(--bg-light)",
+                            padding: "4px 8px",
+                            borderRadius: "6px",
+                          }}
+                        >
+                          {med.period}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    marginBottom: "12px",
-                  }}
-                >
-                  <Clock size={16} style={{ color: "var(--muted-text)" }} />
-                  <p style={{ color: "var(--muted-text)" }}>
-                    Due at {med.time}
-                  </p>
-                </div>
-
-                {med.status === "upcoming" && (
-                  <button
-                    onClick={() => markAsTaken(med.id)}
-                    style={{
-                      width: "100%",
-                      backgroundColor: "var(--primary-blue)",
-                      color: "white",
-                      padding: "12px",
-                      borderRadius: "12px",
-                      border: "none",
-                      cursor: "pointer",
-                      fontWeight: "500",
-                    }}
-                  >
-                    Mark as Taken
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
-
-        {/* Timeline View */}
-        <div
-          style={{
-            backgroundColor: "var(--bg-white)",
-            borderRadius: "16px",
-            padding: "16px",
-            boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
-            marginBottom: "16px",
-          }}
-        >
-          <h3 style={{ marginBottom: "16px" }}>Timeline View</h3>
-          <div
-            style={{
-              display: "flex",
-              gap: "24px",
-              overflowX: "auto",
-              paddingBottom: "8px",
-            }}
-          >
-            {timelineHours.map((hour, index) => (
-              <div
-                key={index}
-                style={{ textAlign: "center", minWidth: "60px" }}
-              >
-                <div
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    borderRadius: "10px",
-                    backgroundColor:
-                      index === 0 ? "var(--primary-blue)" : "var(--card-grey)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    margin: "0 auto 8px",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "20px",
-                      height: "20px",
-                      borderRadius: "50%",
-                      backgroundColor:
-                        index === 0 ? "white" : "var(--muted-text)",
-                    }}
-                  />
-                </div>
-                <p className="caption" style={{ color: "var(--muted-text)" }}>
-                  {hour}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* View Full Schedule Button */}
-        <button
-          onClick={onViewSchedule}
-          style={{
-            width: "100%",
-            backgroundColor: "var(--bg-white)",
-            color: "var(--primary-blue)",
-            padding: "16px",
-            borderRadius: "12px",
-            border: "1px solid var(--primary-blue)",
-            cursor: "pointer",
-            fontWeight: "500",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
-          }}
-        >
-          <Calendar size={20} />
-          View Full Schedule
-        </button>
       </div>
+
+      <style>{`
+        @keyframes spin {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+      `}</style>
     </div>
   );
 }

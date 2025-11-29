@@ -201,9 +201,10 @@ class ApiService {
           username?: string;
           email?: string;
           role?: string;
+          name?: string; // Add name field
         };
       }>(
-        `${this._baseConfig.https}hospitals/auth/refresh/`,
+        `${this._baseConfig.https}/auth/refresh/`,
         {
           refresh: refreshToken, // API expects "refresh" in body
         },

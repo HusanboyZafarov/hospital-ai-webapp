@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import type { UserRoles } from "@/types/user";
+import type { UserRoles } from "../types/user";
 
 const USER_ROLE_COOKIE = "user_role";
 

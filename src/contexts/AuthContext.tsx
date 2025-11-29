@@ -6,7 +6,7 @@ import React, {
   ReactNode,
 } from "react";
 import type { User, AuthResponse, ApiAuthResponse } from "../types/user";
-import { setSession, isValidToken, ACCESS_TOKEN } from "../jwt";
+import { setSession, isValidToken, ACCESS_TOKEN, refreshTokenFn } from "../jwt";
 import authService from "../service/auth";
 
 const STORAGE_KEY = "hospital_ai_auth";
@@ -26,9 +26,9 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load user from localStorage on mount
+  // Load user from localStorage on mount and refresh token if needed
   useEffect(() => {
-    const loadUser = () => {
+    const loadUser = async () => {
       try {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
@@ -38,8 +38,67 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
           // Validate token if exists
           if (accessToken && isValidToken(accessToken)) {
             setUser(authData.user);
+          } else if (accessToken) {
+            // Token exists but expired, try to refresh
+            try {
+              console.log("🔄 Token expired, refreshing...");
+              const refreshResponse = await refreshTokenFn();
+
+              // Update user if refresh response includes user data
+              if (refreshResponse.user) {
+                const refreshedUserData: User = {
+                  id: refreshResponse.user.id?.toString() || authData.user.id,
+                  username:
+                    refreshResponse.user.username || authData.user.username,
+                  email: refreshResponse.user.email || authData.user.email,
+                  name:
+                    (refreshResponse.user as any).name ||
+                    authData.user.name ||
+                    authData.user.username,
+                  role:
+                    (refreshResponse.user.role as User["role"]) ||
+                    authData.user.role,
+                };
+
+                // Update localStorage with refreshed user
+                const updatedAuthData: AuthResponse = {
+                  user: refreshedUserData,
+                  token: refreshResponse.accessToken,
+                };
+                localStorage.setItem(
+                  STORAGE_KEY,
+                  JSON.stringify(updatedAuthData)
+                );
+                setUser(refreshedUserData);
+              } else {
+                // No user in refresh response, use stored user but update token
+                const updatedAuthData: AuthResponse = {
+                  user: authData.user,
+                  token: refreshResponse.accessToken,
+                };
+                localStorage.setItem(
+                  STORAGE_KEY,
+                  JSON.stringify(updatedAuthData)
+                );
+                setUser(authData.user);
+              }
+            } catch (refreshError: any) {
+              console.error("❌ Token refresh failed:", refreshError);
+              // If refresh fails, still try to use stored user (might be network issue)
+              // Only clear if it's a 401/403 (unauthorized)
+              if (
+                refreshError?.response?.status === 401 ||
+                refreshError?.response?.status === 403
+              ) {
+                localStorage.removeItem(STORAGE_KEY);
+                setUser(null);
+              } else {
+                // Network error or other issue, keep user but they'll need to login again
+                setUser(authData.user);
+              }
+            }
           } else {
-            // Token invalid or expired, clear storage
+            // No token at all, clear storage
             localStorage.removeItem(STORAGE_KEY);
             setUser(null);
           }
@@ -94,7 +153,7 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
         id: apiResponse.user.id.toString(),
         username: apiResponse.user.username,
         email: apiResponse.user.email || undefined,
-        name: apiResponse.user.username, // Use username as name fallback
+        name: (apiResponse.user as any).name || apiResponse.user.username, // Use name if available, otherwise username
         role: apiResponse.user.role as User["role"],
       };
 

@@ -1,3 +1,4 @@
+import { endpoint } from "../constants/api";
 import { axiosInstance } from "../jwt";
 
 interface ChatResponse {
@@ -9,8 +10,10 @@ interface ChatResponse {
 const postChat = async (question: string): Promise<ChatResponse> => {
   try {
     const response = await axiosInstance.post<ChatResponse>(
-      "patients/ai-chat/",
-      { question }
+      `${endpoint}/ai-chat/`,
+      {
+        question,
+      }
     );
     // Handle response - axiosInstance might return data directly or wrapped
     return (response as any)?.data || response;

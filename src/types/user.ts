@@ -20,6 +20,7 @@ export interface ApiAuthResponse {
     username: string;
     email: string;
     role: string;
+    name?: string; // Add name field if API returns it
   };
 }
 

@@ -8,11 +8,11 @@ interface BottomNavProps {
 
 export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   const tabs = [
-    { id: "home", icon: Home, label: "Home" },
-    { id: "medications", icon: Pill, label: "Medications" },
-    { id: "diet", icon: Utensils, label: "Diet" },
-    { id: "activities", icon: Activity, label: "Activities" },
-    { id: "ai", icon: MessageSquare, label: "AI" },
+    { id: "home", icon: Home, label: "Asosiy" },
+    { id: "medications", icon: Pill, label: "Dorilar" },
+    { id: "diet", icon: Utensils, label: "Ovqat" },
+    { id: "activities", icon: Activity, label: "Faoliyatlar" },
+    { id: "ai", icon: MessageSquare, label: "AI chat" },
   ];
 
   return (
