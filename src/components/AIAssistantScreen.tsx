@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Send } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import aiChatService from "../service/aiChat";
 
@@ -12,6 +13,7 @@ interface Message {
 
 export function AIAssistantScreen() {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const userName = user?.name || user?.username || "there";
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
@@ -19,6 +21,7 @@ export function AIAssistantScreen() {
   const [error, setError] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const hasAutoSentQuery = useRef(false);
 
   // Initialize with welcome message
   useEffect(() => {
@@ -44,10 +47,10 @@ export function AIAssistantScreen() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSend = async () => {
-    if (!inputValue.trim() || isTyping) return;
+  const handleSendMessage = async (questionText?: string) => {
+    const question = questionText || inputValue.trim();
+    if (!question || isTyping) return;
 
-    const question = inputValue.trim();
     const userMessage: Message = {
       id: Date.now(),
       type: "user",
@@ -59,11 +62,16 @@ export function AIAssistantScreen() {
     };
 
     setMessages((prev) => [...prev, userMessage]);
-    setInputValue("");
-    // Reset textarea height
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
+
+    // Clear input if not using provided text
+    if (!questionText) {
+      setInputValue("");
+      // Reset textarea height
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "auto";
+      }
     }
+
     setIsTyping(true);
     setError("");
 
@@ -110,6 +118,25 @@ export function AIAssistantScreen() {
       setIsTyping(false);
     }
   };
+
+  const handleSend = async () => {
+    await handleSendMessage();
+  };
+
+  // Auto-send query from URL params
+  useEffect(() => {
+    const queryParam = searchParams.get("q");
+    if (queryParam && !hasAutoSentQuery.current && messages.length > 0) {
+      hasAutoSentQuery.current = true;
+      // Clear the query param from URL
+      setSearchParams({});
+      // Auto-send after a short delay to ensure welcome message is shown
+      setTimeout(() => {
+        handleSendMessage(queryParam);
+      }, 500);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, messages.length]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {

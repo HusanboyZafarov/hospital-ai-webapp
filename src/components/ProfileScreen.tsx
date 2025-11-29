@@ -105,33 +105,13 @@ export function ProfileScreen({
       items: [
         { label: "Ism", value: profileData?.name || displayName },
         { label: "Tug'ilgan sana", value: profileData?.date_of_birth || "—" },
-        { label: "Qon guruhi", value: profileData?.blood_type || "—" },
-        { label: "Email", value: profileData?.email || user?.email || "—" },
         { label: "Telefon", value: profileData?.phone || "—" },
       ],
     },
     {
       title: "Jarrohlik ma'lumotlari",
       icon: Heart,
-      items: [
-        { label: "Protsiya", value: profileData?.procedure || "—" },
-        { label: "Jarrohlik sanasi", value: profileData?.surgery_date || "—" },
-        { label: "Kasbxona", value: profileData?.hospital || "—" },
-        { label: "Xona", value: profileData?.room || "—" },
-      ],
-    },
-    {
-      title: "Parvarish jamoasi",
-      icon: Stethoscope,
-      items: [
-        { label: "Asosiy jarroh", value: profileData?.primary_surgeon || "—" },
-        { label: "Asosiy hamshira", value: profileData?.primary_nurse || "—" },
-        { label: "Bo'lim", value: profileData?.department || "—" },
-        {
-          label: "Favqulodda aloqa",
-          value: profileData?.emergency_contact || "—",
-        },
-      ],
+      items: [{ label: "Shifoxona nomi", value: profileData?.hospital || "—" }],
     },
   ];
 
@@ -303,29 +283,6 @@ export function ProfileScreen({
             marginBottom: "24px",
           }}
         >
-          <button
-            onClick={onViewCarePlan}
-            style={{
-              backgroundColor: "var(--bg-white)",
-              border: "1px solid var(--border-grey)",
-              borderRadius: "12px",
-              padding: "16px",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              width: "100%",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <Heart size={20} style={{ color: "var(--primary-blue)" }} />
-              <span style={{ fontWeight: "500" }}>
-                To'liq parvarish rejasini ko'rish
-              </span>
-            </div>
-            <ChevronRight size={20} style={{ color: "var(--muted-text)" }} />
-          </button>
-
           <button
             style={{
               backgroundColor: "var(--bg-white)",

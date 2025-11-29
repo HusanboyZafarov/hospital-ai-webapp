@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Clock, Check, X, Calendar, Loader2 } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import { medicineService } from "../service/medicine";
 
 interface MedicationsScreenProps {
@@ -10,8 +10,9 @@ interface Medication {
   id: number;
   name: string;
   dosage: string;
-  period: string;
-  times: number;
+  frequency: string;
+  start_date?: string;
+  end_date?: string;
 }
 
 export function MedicationsScreen({ onViewSchedule }: MedicationsScreenProps) {
@@ -34,7 +35,7 @@ export function MedicationsScreen({ onViewSchedule }: MedicationsScreenProps) {
           return;
         }
 
-        // Handle API response - adjust based on actual API structure
+        // Handle API response - API returns { medications: [], timeline: [] }
         if (response?.medications && Array.isArray(response.medications)) {
           setMedications(response.medications);
         } else if (Array.isArray(response)) {
@@ -183,28 +184,19 @@ export function MedicationsScreen({ onViewSchedule }: MedicationsScreenProps) {
                           flexWrap: "wrap",
                         }}
                       >
-                        <span
-                          style={{
-                            color: "var(--muted-text)",
-                            fontSize: "13px",
-                            backgroundColor: "var(--bg-light)",
-                            padding: "4px 8px",
-                            borderRadius: "6px",
-                          }}
-                        >
-                          {med.times} marta
-                        </span>
-                        <span
-                          style={{
-                            color: "var(--muted-text)",
-                            fontSize: "13px",
-                            backgroundColor: "var(--bg-light)",
-                            padding: "4px 8px",
-                            borderRadius: "6px",
-                          }}
-                        >
-                          {med.period}
-                        </span>
+                        {med.frequency && (
+                          <span
+                            style={{
+                              color: "var(--muted-text)",
+                              fontSize: "13px",
+                              backgroundColor: "var(--bg-light)",
+                              padding: "4px 8px",
+                              borderRadius: "6px",
+                            }}
+                          >
+                            {med.frequency}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
